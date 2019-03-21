@@ -17,25 +17,39 @@ void parseFieldMap()
     int ny=std::stoi(GetBitBeforeComma(line));
     int nz=std::stoi(GetBitBeforeComma(line));
     
-    //TH3D *xfield = new TH3D("xfield","xfield",nx,ny,nz,0,nx,0,ny,0,nz);
-    TH1D *xfield = new TH1D("x","x",nx,0,nx);
-    TH2D *xyfield = new TH2D("xy","xy",nx,0,nx,ny,0,ny);
+    TH3D *xfield = new TH3D("xfield","xfield",nx,0,nx,ny,0,ny,nz,0,nz);
+    //TH1D *xfield = new TH1D("x","x",nx,0,nx);
+    //TH2D *xyfield = new TH2D("xy","xy",nx,0,nx,ny,0,ny);
     cout<<nx<<":"<<ny<<":"<<nz<<endl;
-
-    for (int y=1;y<=ny;y++)
+    for (int z=1;z<=nz;z++)
     {
-      getline (*f,line);
-      int ax=std::stoi(GetBitBeforeComma(line)); //index of the B vector's coordinates on X (ax=0), Y (ax=1) or Z (ax=2)
-      int iy=std::stoi(GetBitBeforeComma(line)); //positional sampling index on the Y axis
-      int iz=std::stoi(GetBitBeforeComma(line)); //positional sampling index on the Z axis
-      for (int x=01;x<=nx;x++)
+      for (int y=1;y<=ny;y++)
       {
-        xyfield->SetBinContent(x,y,std::stod(GetBitBeforeComma(line)));
+        getline (*f,line);
+        int ax=std::stoi(GetBitBeforeComma(line)); //index of the B vector's coordinates on X (ax=0), Y (ax=1) or Z (ax=2)
+        int iy=std::stoi(GetBitBeforeComma(line)); //positional sampling index on the Y axis
+        int iz=std::stoi(GetBitBeforeComma(line)); //positional sampling index on the Z axis
+        for (int x=1;x<=nx;x++)
+        {
+          xfield->SetBinContent(x,y,z,std::stod(GetBitBeforeComma(line)));
+        }
       }
     }
     TCanvas *c=new TCanvas("c","c",900,600);
-    xyfield->Draw("COLZ");
-    c->SaveAs("temp.png");
+    //xyfield->Draw("COLZ");
+    TH2D *x_xy=(TH2D*)xfield->Project3D("xy"); // This will sum over z so divide by number of z bins to get an average field
+    x_xy->Scale((1./nz));
+    TH2D *x_yz=(TH2D*)xfield->Project3D("yz");
+    x_yz->Scale((1./nx));
+    TH2D *x_xz=(TH2D*)xfield->Project3D("xz");
+    x_xz->Scale((1./ny));
+    
+    x_xy->Draw("COLZ");
+    c->SaveAs("x_xy.png");
+    x_yz->Draw("COLZ");
+    c->SaveAs("x_yz.png");
+    x_xz->Draw("COLZ");
+    c->SaveAs("x_xz.png");
 
     f->close();
   }
