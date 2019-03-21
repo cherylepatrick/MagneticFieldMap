@@ -17,12 +17,19 @@ void parseFieldMap()
     int nx=std::stoi(GetBitBeforeComma(line));
     int ny=std::stoi(GetBitBeforeComma(line));
     int nz=std::stoi(GetBitBeforeComma(line));
+    
+    
+    string xtitle="Centre to xwall";
+    string ytitle="Along wires to vetos";
+    string ztitle="Foil to main wall";
+    
     std::vector<TH3D*> hComponents;
     for (int i=0;i<3;i++) // 3 components of the field
     {
       string comp="x"; if (i==1) comp="y";if (i==2)comp="z";
+      string title="Field towards x wall"; if (i==1) title="Field along wires"; if (i==2) title="Field towards main wall";
       
-      TH3D *field = new TH3D((comp+"field").c_str(),(comp+"field").c_str(),nx,0,nx,ny,0,ny,nz,0,nz);
+      TH3D *field = new TH3D(title.c_str(),title.c_str(),nx,0,nx*0.02,ny,0,ny*0.02,nz,0,nz*0.02);
       for (int z=1;z<=nz;z++) //
       {
         for (int y=1;y<=ny;y++)
@@ -37,14 +44,27 @@ void parseFieldMap()
           }
         }
       }
+      
+      // Print projections of each of the 3 field components, on each of the 3 2-d planes
+      
+      // Note that Steve's y field is the one along the wires i.e. the main component
+      
       TCanvas *c=new TCanvas("c","c",900,600);
-
+      
       TH2D *x_xy=(TH2D*)field->Project3D("xy"); // This will sum over z so divide by number of z bins to get an average field
       x_xy->Scale((1./nz));
+      x_xy->GetYaxis()->SetTitle(xtitle.c_str());
+      x_xy->GetXaxis()->SetTitle(ytitle.c_str());
+      
       TH2D *x_yz=(TH2D*)field->Project3D("yz");
       x_yz->Scale((1./nx));
+      x_yz->GetYaxis()->SetTitle(ytitle.c_str());
+      x_yz->GetXaxis()->SetTitle(ztitle.c_str());
+      
       TH2D *x_xz=(TH2D*)field->Project3D("xz");
       x_xz->Scale((1./ny));
+      x_xz->GetYaxis()->SetTitle(xtitle.c_str());
+      x_xz->GetXaxis()->SetTitle(ztitle.c_str());
       
       x_xy->Draw("COLZ");
       c->SaveAs((comp+"_xy.png").c_str());
@@ -53,6 +73,7 @@ void parseFieldMap()
       x_xz->Draw("COLZ");
       c->SaveAs((comp+"_xz.png").c_str());
       hComponents.push_back(field);
+      
     }
     f->close();
   }
