@@ -1,0 +1,2 @@
+# MagneticFieldMap
+SuperNEMO magnetic field
