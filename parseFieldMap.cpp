@@ -1,7 +1,8 @@
 #include <iostream>
 #include <fstream>
 string GetBitBeforeComma(string& input);
-TH1D *MakeFieldProjection(TH3D *plot3d, int zbin, string title, int color);
+TH1D *MakeFieldProjection(TH3D *plot3d, int ybin, int zbin, string title, int color);
+void MakePlotSet(TH3D *totalfield, int ybin, string text);
 
 string xtitle="Centre to xwall";
 string ytitle="Along wires to vetos";
@@ -96,53 +97,9 @@ void parseFieldMap()
         }
       }
     }
-    // Take a 1d slice in our x (foil to main wall ) at y=0, z=0
-    // In these coordinates we want a slice in z
-    // And then we will take slices in z at various "y" values (our z, ie along the wires)
-    
-    TH1D *y0 =MakeFieldProjection(totalfield, 1, "Centre of detector", kRed+2);
-    y0->Draw();
-    c->SaveAs("detector_centre.png");
-    
-    TH1D *y50 =MakeFieldProjection(totalfield, 25, "50 cm above centre", kPink-2);
-    y50->Draw();
-    c->SaveAs("offset_50cm.png");
-    
-    TH1D *y1 =MakeFieldProjection(totalfield, 50, "1m above centre", kMagenta+1);
-    y1->Draw();
-    c->SaveAs("offset_1_metre.png");
-    
-    TH1D *y150 =MakeFieldProjection(totalfield, 75, "1.5m above centre", kViolet-3);
-    y150->Draw();
-    c->SaveAs("offset_150cm.png");
-    
-    TH1D *y18 =MakeFieldProjection(totalfield, 90, "1.8m above centre", kBlue-7);
-    y18->Draw();
-    c->SaveAs("offset_1_8_metres.png");
-    
-    TH1D *yveto =MakeFieldProjection(totalfield, 96, "Next to veto", kBlue+2);
-    yveto->Draw();
-    c->SaveAs("offset_veto.png");
-    
-    y0->SetTitle("Field magnitude for various heights");
-    y0->Draw();
-    y50->Draw("SAME");
-    y1->Draw("SAME");
-    y150->Draw("SAME");
-    y18->Draw("SAME");
-    yveto->Draw("SAME");
-    c->SetTitle("Field at different heights");
-    
-    TLegend *leg=new TLegend(0.7,0.4,0.9,0.7); // Add a legend
-    leg->AddEntry(y0, "Centre","l");
-    leg->AddEntry(y50,"50cm from centre","l");
-    leg->AddEntry(y1,"1m from centre","l");
-    leg->AddEntry(y150,"1.5m from centre","l");
-    leg->AddEntry(y18,"1.8m from centre","l");
-    leg->AddEntry(yveto,"Next to veto","l");
-    leg->Draw();
-    
-    c->SaveAs("offsets_all.png");
+    MakePlotSet(totalfield,1,"C-section join");
+    MakePlotSet(totalfield,100,"2m from C-section join");
+    MakePlotSet(totalfield,130,"Near Xwall");
     
     f->close();
   }
@@ -172,9 +129,9 @@ string GetBitBeforeComma(string& input)
   return output;
 }
 
-TH1D *MakeFieldProjection(TH3D *plot3d, int zbin, string title, int color)
+TH1D *MakeFieldProjection(TH3D *plot3d, int ybin, int zbin, string title, int color)
 {
-  TH1D *plot= plot3d->ProjectionZ(title.c_str(),1,1,zbin,zbin);
+  TH1D *plot= plot3d->ProjectionZ(title.c_str(),ybin,ybin,zbin,zbin);
   plot->GetYaxis()->SetRangeUser(0,50000);
   plot->GetXaxis()->SetTitle(ztitle.c_str());
   plot->GetYaxis()->SetTitle("Field magnitude (mGauss)");
@@ -182,4 +139,56 @@ TH1D *MakeFieldProjection(TH3D *plot3d, int zbin, string title, int color)
   plot->SetLineColor(color);
   plot->SetLineWidth(3);
   return plot;
+}
+
+void MakePlotSet(TH3D *totalfield, int ybin, string text)
+{
+  TCanvas *c=new TCanvas("c","c",900,600);
+  // Take a 1d slice in our x (foil to main wall ) at y=0, z=0
+  // In these coordinates we want a slice in z
+  // And then we will take slices in z at various "y" values (our z, ie along the wires)
+  
+  TH1D *y0 =MakeFieldProjection(totalfield, ybin,1, "Centre of detector", kRed+2);
+//  y0->Draw();
+//  c->SaveAs((text+"_detector_centre.png").c_str());
+  
+  TH1D *y50 =MakeFieldProjection(totalfield, ybin,25, "50 cm above centre", kPink-2);
+//  y50->Draw();
+//  c->SaveAs((text+"_offset_50cm.png").c_str());
+  
+  TH1D *y1 =MakeFieldProjection(totalfield, ybin,50, "1m above centre", kMagenta+1);
+//  y1->Draw();
+//  c->SaveAs((text+"_offset_1_metre.png").c_str());
+  
+  TH1D *y150 =MakeFieldProjection(totalfield, ybin,75, "1.5m above centre", kViolet-3);
+//  y150->Draw();
+//  c->SaveAs((text+"_offset_150cm.png").c_str());
+  
+  TH1D *y18 =MakeFieldProjection(totalfield, ybin,90, "1.8m above centre", kBlue-7);
+//  y18->Draw();
+//  c->SaveAs((text+"_offset_1_8_metres.png").c_str());
+  
+  TH1D *yveto =MakeFieldProjection(totalfield, ybin,96, "Next to veto", kBlue+2);
+//  yveto->Draw();
+//  c->SaveAs((text+"_offset_veto.png").c_str());
+  
+  y0->SetTitle("Field magnitude for various heights");
+  y0->Draw();
+  y50->Draw("SAME");
+  y1->Draw("SAME");
+  y150->Draw("SAME");
+  y18->Draw("SAME");
+  yveto->Draw("SAME");
+  c->SetTitle(("Field at different heights: "+text).c_str());
+  
+  TLegend *leg=new TLegend(0.7,0.4,0.9,0.7); // Add a legend
+  leg->AddEntry(y0, "Centre","l");
+  leg->AddEntry(y50,"50cm from centre","l");
+  leg->AddEntry(y1,"1m from centre","l");
+  leg->AddEntry(y150,"1.5m from centre","l");
+  leg->AddEntry(y18,"1.8m from centre","l");
+  leg->AddEntry(yveto,"Next to veto","l");
+  leg->Draw();
+  
+  c->SaveAs((text+"_offsets_all.png").c_str());
 }
