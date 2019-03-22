@@ -1,6 +1,12 @@
 #include <iostream>
 #include <fstream>
 string GetBitBeforeComma(string& input);
+TH1D *MakeFieldProjection(TH3D *plot3d, int zbin, string title, int color);
+
+string xtitle="Centre to xwall";
+string ytitle="Along wires to vetos";
+string ztitle="Foil to main wall";
+
 
 void parseFieldMap()
 {
@@ -18,10 +24,7 @@ void parseFieldMap()
     int ny=std::stoi(GetBitBeforeComma(line));
     int nz=std::stoi(GetBitBeforeComma(line));
     
-    
-    string xtitle="Centre to xwall";
-    string ytitle="Along wires to vetos";
-    string ztitle="Foil to main wall";
+
     
     TCanvas *c=new TCanvas("c","c",900,600);
     
@@ -97,57 +100,27 @@ void parseFieldMap()
     // In these coordinates we want a slice in z
     // And then we will take slices in z at various "y" values (our z, ie along the wires)
     
-    TH1D *y0 = totalfield->ProjectionZ("centre",1,1,1,1);
-    y0->GetYaxis()->SetRangeUser(0,50000);
-    y0->GetXaxis()->SetTitle(ztitle.c_str());
-    y0->SetTitle("Centre of detector");
-    y0->SetLineColor(kRed+2);
-    y0->SetLineWidth(3);
+    TH1D *y0 =MakeFieldProjection(totalfield, 1, "Centre of detector", kRed+2);
     y0->Draw();
     c->SaveAs("detector_centre.png");
     
-    TH1D *y50 = totalfield->ProjectionZ("HalfMetre",1,1,25,25);
-    y50->GetYaxis()->SetRangeUser(0,50000);
-    y50->GetXaxis()->SetTitle(ztitle.c_str());
-    y50->SetTitle("50 cm above centre");
-    y50->SetLineColor(kPink-2);
-    y50->SetLineWidth(3);
+    TH1D *y50 =MakeFieldProjection(totalfield, 25, "50 cm above centre", kPink-2);
     y50->Draw();
     c->SaveAs("offset_50cm.png");
     
-    TH1D *y1 = totalfield->ProjectionZ("Metre1",1,1,50,50);
-    y1->GetYaxis()->SetRangeUser(0,50000);
-    y1->GetXaxis()->SetTitle(ztitle.c_str());
-    y1->SetTitle("1 metre above centre");
-    y1->SetLineColor(kMagenta+1);
-    y1->SetLineWidth(3);
+    TH1D *y1 =MakeFieldProjection(totalfield, 50, "1m above centre", kMagenta+1);
     y1->Draw();
     c->SaveAs("offset_1_metre.png");
     
-    TH1D *y150 = totalfield->ProjectionZ("OneAndHalfMetre",1,1,75,75);
-    y150->GetYaxis()->SetRangeUser(0,50000);
-    y150->GetXaxis()->SetTitle(ztitle.c_str());
-    y150->SetTitle("150 cm above centre");
-    y150->SetLineColor(kViolet-3);
-    y150->SetLineWidth(3);
+    TH1D *y150 =MakeFieldProjection(totalfield, 75, "1.5m above centre", kViolet-3);
     y150->Draw();
     c->SaveAs("offset_150cm.png");
     
-    TH1D *y18 = totalfield->ProjectionZ("Cm180",1,1,90,90);
-    y18->GetYaxis()->SetRangeUser(0,50000);
-    y18->GetXaxis()->SetTitle(ztitle.c_str());
-    y18->SetTitle("1.8 metres above centre (very close to veto)");
-    y18->SetLineColor(kBlue-7);
-    y18->SetLineWidth(3);
+    TH1D *y18 =MakeFieldProjection(totalfield, 90, "1.8m above centre", kBlue-7);
     y18->Draw();
     c->SaveAs("offset_1_8_metres.png");
     
-    TH1D *yveto = totalfield->ProjectionZ("ByVeto",1,1,96,96);
-    yveto->GetYaxis()->SetRangeUser(0,50000);
-    yveto->GetXaxis()->SetTitle(ztitle.c_str());
-    yveto->SetTitle("Right next to veto");
-    yveto->SetLineColor(kBlue+1);
-    yveto->SetLineWidth(3);
+    TH1D *yveto =MakeFieldProjection(totalfield, 96, "Next to veto", kBlue+2);
     yveto->Draw();
     c->SaveAs("offset_veto.png");
     
@@ -160,7 +133,7 @@ void parseFieldMap()
     yveto->Draw("SAME");
     c->SetTitle("Field at different heights");
     
-    TLegend *leg=new TLegend(0.6,0.4,0.85,0.7); // Add a legend
+    TLegend *leg=new TLegend(0.7,0.4,0.9,0.7); // Add a legend
     leg->AddEntry(y0, "Centre","l");
     leg->AddEntry(y50,"50cm from centre","l");
     leg->AddEntry(y1,"1m from centre","l");
@@ -197,4 +170,16 @@ string GetBitBeforeComma(string& input)
     input=input.substr(pos+1);
   }
   return output;
+}
+
+TH1D *MakeFieldProjection(TH3D *plot3d, int zbin, string title, int color)
+{
+  TH1D *plot= plot3d->ProjectionZ(title.c_str(),1,1,zbin,zbin);
+  plot->GetYaxis()->SetRangeUser(0,50000);
+  plot->GetXaxis()->SetTitle(ztitle.c_str());
+  plot->GetYaxis()->SetTitle("Field magnitude (mGauss)");
+  plot->SetTitle(title.c_str());
+  plot->SetLineColor(color);
+  plot->SetLineWidth(3);
+  return plot;
 }
