@@ -98,6 +98,7 @@ void parseFieldMap()
       }
     }
     MakePlotSet(totalfield,1,"C-section join");
+    MakePlotSet(totalfield,50,"1m from C-section join");
     MakePlotSet(totalfield,100,"2m from C-section join");
     MakePlotSet(totalfield,130,"Near Xwall");
     
@@ -172,7 +173,7 @@ void MakePlotSet(TH3D *totalfield, int ybin, string text)
 //  yveto->Draw();
 //  c->SaveAs((text+"_offset_veto.png").c_str());
   
-  y0->SetTitle("Field magnitude for various heights");
+  y0->SetTitle(("Field at different heights: "+text).c_str());
   y0->Draw();
   y50->Draw("SAME");
   y1->Draw("SAME");
