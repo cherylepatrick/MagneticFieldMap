@@ -175,12 +175,12 @@ void MakePlotSet(TH3D *totalfield, int ybin, string text)
 //  c->SaveAs((text+"_offset_veto.png").c_str());
   
   y0->SetTitle(("Field at different heights: "+text).c_str());
-  y0->Draw();
-  y50->Draw("SAME");
-  y1->Draw("SAME");
-  y150->Draw("SAME");
-  y18->Draw("SAME");
-  yveto->Draw("SAME");
+  y0->Draw("HIST");
+  y50->Draw("HIST SAME");
+  y1->Draw("HIST SAME");
+  y150->Draw("HIST SAME");
+  y18->Draw("HIST SAME");
+  yveto->Draw("HIST SAME");
   c->SetTitle(("Field at different heights: "+text).c_str());
   
   TLegend *leg=new TLegend(0.7,0.4,0.9,0.7); // Add a legend
@@ -199,7 +199,7 @@ void MakePlotSet(TH3D *totalfield, int ybin, string text)
   TH3D *temp3d = (TH3D*)totalfield->Clone();
   temp3d->GetXaxis()->SetRange(ybin,ybin);
   TH2D *plot2d = (TH2D*)temp3d->Project3D("yz");
-  plot2d->SetTitle(("Field (G) at "+text).c_str());
+  plot2d->SetTitle(("Field at "+text+" (Gauss)").c_str());
   plot2d->Scale(1./1000);
   plot2d->GetZaxis()->SetRangeUser(0,50);
   plot2d->GetXaxis()->SetTitle(ztitle.c_str());
