@@ -54,7 +54,7 @@ void parseFieldMap()
       // Print projections of each of the 3 field components, on each of the 3 2-d planes
       
       // Note that Steve's y field is the one along the wires i.e. the main component
-      
+      gStyle->SetPalette(kBird);
       TH2D *x_xy=(TH2D*)field->Project3D("xy"); // This will sum over z so divide by number of z bins to get an average field
       x_xy->Scale((1./nz));
       x_xy->GetYaxis()->SetTitle(xtitle.c_str());
@@ -193,10 +193,15 @@ void MakePlotSet(TH3D *totalfield, int ybin, string text)
   
   c->SaveAs((text+"_offsets_all.png").c_str());
   
-  // Select only the ybin in question
+  // Select only the ybin in question and make a 2d plot
+  TCanvas *c2=new TCanvas("c","c",600,900);
   TH3D *temp3d = (TH3D*)totalfield->Clone();
-  temp3d->GetYaxis()->SetRange(ybin,ybin);
-  TH2D *plot2d = (TH2D*)temp3d->Project3D("xz");
+  temp3d->GetXaxis()->SetRange(ybin,ybin);
+  TH2D *plot2d = (TH2D*)temp3d->Project3D("yz");
+  plot2d->Scale(1./1000);
+  plot2d->GetZaxis()->SetRangeUser(0,40);
+  //c2->SetLogz();
+  gStyle->SetPalette(kSunset);
   plot2d->Draw("COLZ");
-  c->SaveAs((text+"_2d.png").c_str());
+  c2->SaveAs((text+"_2d.png").c_str());
 }
