@@ -192,4 +192,11 @@ void MakePlotSet(TH3D *totalfield, int ybin, string text)
   leg->Draw();
   
   c->SaveAs((text+"_offsets_all.png").c_str());
+  
+  // Select only the ybin in question
+  TH3D *temp3d = (TH3D*)totalfield->Clone();
+  temp3d->GetYaxis()->SetRange(ybin,ybin);
+  TH2D *plot2d = (TH2D*)temp3d->Project3D("xz");
+  plot2d->Draw("COLZ");
+  c->SaveAs((text+"_2d.png").c_str());
 }
