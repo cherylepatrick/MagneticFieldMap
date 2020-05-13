@@ -4,9 +4,9 @@ string GetBitBeforeComma(string& input);
 TH1D *MakeFieldProjection(TH3D *plot3d, int ybin, int zbin, string title, int color);
 void MakePlotSet(TH3D *totalfield, int ybin, string text);
 
-string xtitle="Centre to xwall";
-string ytitle="Along wires to vetos";
-string ztitle="Foil to main wall";
+string xtitle="C-section join to xwall (m)";
+string ytitle="Vertical - centre to veto (m)";
+string ztitle="Foil to main wall (m)";
 
 
 void parseFieldMap()
@@ -133,9 +133,10 @@ string GetBitBeforeComma(string& input)
 TH1D *MakeFieldProjection(TH3D *plot3d, int ybin, int zbin, string title, int color)
 {
   TH1D *plot= plot3d->ProjectionZ(title.c_str(),ybin,ybin,zbin,zbin);
-  plot->GetYaxis()->SetRangeUser(0,50000);
+  plot->Scale(0.001); // mGauss to Gauss
+  plot->GetYaxis()->SetRangeUser(0,50);
   plot->GetXaxis()->SetTitle(ztitle.c_str());
-  plot->GetYaxis()->SetTitle("Field magnitude (mGauss)");
+  plot->GetYaxis()->SetTitle("Field magnitude (Gauss)");
   plot->SetTitle(title.c_str());
   plot->SetLineColor(color);
   plot->SetLineWidth(3);
@@ -198,8 +199,11 @@ void MakePlotSet(TH3D *totalfield, int ybin, string text)
   TH3D *temp3d = (TH3D*)totalfield->Clone();
   temp3d->GetXaxis()->SetRange(ybin,ybin);
   TH2D *plot2d = (TH2D*)temp3d->Project3D("yz");
+  plot2d->SetTitle(("Field (G) at "+text).c_str());
   plot2d->Scale(1./1000);
-  plot2d->GetZaxis()->SetRangeUser(0,40);
+  plot2d->GetZaxis()->SetRangeUser(0,50);
+  plot2d->GetXaxis()->SetTitle(ztitle.c_str());
+  plot2d->GetYaxis()->SetTitle(ytitle.c_str());
   //c2->SetLogz();
   gStyle->SetPalette(kSunset);
   plot2d->Draw("COLZ");
