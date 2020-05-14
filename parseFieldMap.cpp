@@ -97,6 +97,10 @@ void parseFieldMap()
         }
       }
     }
+    
+    gStyle->SetPalette(kSunset);
+    TColor::InvertPalette();
+    
     MakePlotSet(totalfield,1,"C-section join");
     MakePlotSet(totalfield,50,"1m from C-section join");
     MakePlotSet(totalfield,100,"2m from C-section join");
@@ -205,7 +209,7 @@ void MakePlotSet(TH3D *totalfield, int ybin, string text)
   plot2d->GetXaxis()->SetTitle(ztitle.c_str());
   plot2d->GetYaxis()->SetTitle(ytitle.c_str());
   //c2->SetLogz();
-  gStyle->SetPalette(kSunset);
+  //gStyle->SetPalette(kInvertedDarkBodyRadiator);
   plot2d->Draw("COLZ");
   c2->SaveAs((text+"_2d.png").c_str());
 }
